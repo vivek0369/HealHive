@@ -69,6 +69,8 @@ app.use("/api/payments", paymentRoutes);
 
 
 app.use("/api/doctor", doctorRoutes);
+import aiRoutes from "./routes/ai.js";
+app.use("/api/ai", aiRoutes);
 
 // Global Error Handler
 app.use(errorHandler);
