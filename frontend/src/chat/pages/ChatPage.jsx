@@ -171,10 +171,25 @@ const ChatPage = () => {
     navigate(-1);
   };
 
+  const handleVideoCall = () => {
+    navigate(`/call-room/${consultationId}`, {
+      state: {
+        doctor: { name: otherParty.name, specialty: otherParty.specialty },
+        patientName: user?.displayName || 'Patient',
+        paid: true // Assuming they are allowed to chat, they have paid
+      }
+    });
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gradient-to-b from-emerald-50 via-white to-teal-50">
       {/* Header */}
-      <ChatHeader doctor={otherParty} onBack={handleBack} />
+      <ChatHeader 
+        doctor={otherParty} 
+        onBack={handleBack} 
+        onVideoCall={handleVideoCall} 
+        onPhoneCall={handleVideoCall} 
+      />
 
       {/* Messages */}
       <ChatMessages messages={messages} />

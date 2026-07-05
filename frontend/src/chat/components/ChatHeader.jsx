@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronLeft, Phone, Video, MoreVertical } from 'lucide-react';
 
-const ChatHeader = ({ doctor, onBack }) => {
+const ChatHeader = ({ doctor, onBack, onVideoCall, onPhoneCall }) => {
   return (
     <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 text-white p-4 shadow-lg">
       <div className="flex items-center justify-between">
@@ -27,12 +27,14 @@ const ChatHeader = ({ doctor, onBack }) => {
 
         <div className="flex items-center gap-2">
           <button
+            onClick={onPhoneCall}
             className="hover:bg-white/20 rounded-full p-2 transition-colors"
             aria-label="Start phone call"
           >
             <Phone size={20} />
           </button>
           <button
+            onClick={onVideoCall}
             className="hover:bg-white/20 rounded-full p-2 transition-colors"
             aria-label="Start video call"
           >

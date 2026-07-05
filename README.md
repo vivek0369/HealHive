@@ -32,6 +32,7 @@ HealHive provides an end-to-end telehealth experience for patients and doctors. 
 - Doctor search and selection by specialty and availability
 - Consultation payment session creation and confirmation via Stripe
 - Real-time chat and video signaling support using Socket.IO
+- Complete WebRTC peer-to-peer video calling interface
 - Patient profile management and medical history capture
 - Doctor profile registration and availability management
 - MongoDB persistence for doctor, patient, and consultation state
@@ -190,7 +191,6 @@ Open your browser at the URL shown by Vite (usually `http://localhost:5173`).
 ## Future Improvements
 
 - Add full patient appointment history and doctor availability scheduling
-- Implement complete video call UI using WebRTC streams
 - Add role-based navigation and authorization enforcement on the frontend
 - Improve Stripe payment confirmation and webhook handling
 - Add automated tests for backend and frontend components
