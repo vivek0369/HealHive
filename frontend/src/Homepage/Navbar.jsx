@@ -4,7 +4,8 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../firebase";
 import { doctors } from "../utils/doctorFilterService";
 import { useTheme } from "../Context/ThemeContext";
-import { Sun, Moon, Monitor } from "lucide-react";
+import { Sun, Moon, Monitor, Bell, Check, Info, AlertTriangle, XCircle } from "lucide-react";
+import { useNotifications } from "../hooks/useNotifications";
 
 const navLinks = [
   { name: "Home", to: "/" },
@@ -22,6 +23,9 @@ const Navbar = () => {
   const [searchInput, setSearchInput] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(user);
 
   const menuRef = useRef(null);
   const navigate = useNavigate();
@@ -173,6 +177,7 @@ const Navbar = () => {
         setOpen(false);
         setShowSuggestions(false);
         setActiveSuggestion(-1);
+        setShowNotifications(false);
       }
     };
     document.addEventListener("mousedown", handler);
@@ -412,6 +417,75 @@ const Navbar = () => {
                 </div>
               )}
             </div>
+
+            {/* NOTIFICATIONS */}
+            {user && (
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    setShowNotifications((s) => !s);
+                    setShowAccount(false);
+                    setShowThemeMenu(false);
+                  }}
+                  className="relative p-2 rounded-xl border border-emerald-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-emerald-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition"
+                  title="Notifications"
+                >
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-500 rounded-full">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {showNotifications && (
+                  <div className="absolute right-0 mt-3 w-80 rounded-xl bg-white dark:bg-slate-800 shadow-xl border border-emerald-100 dark:border-slate-700 overflow-hidden z-50 flex flex-col max-h-96">
+                    <div className="p-3 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+                      <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Notifications</h3>
+                      {unreadCount > 0 && (
+                        <button 
+                          onClick={markAllAsRead}
+                          className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
+                        >
+                          Mark all as read
+                        </button>
+                      )}
+                    </div>
+                    <div className="overflow-y-auto flex-1">
+                      {notifications.length === 0 ? (
+                        <div className="p-4 text-center text-sm text-slate-500">No notifications yet.</div>
+                      ) : (
+                        notifications.map((notif) => (
+                          <div 
+                            key={notif._id}
+                            onClick={() => !notif.isRead && markAsRead(notif._id)}
+                            className={`p-3 border-b border-slate-50 dark:border-slate-700/50 flex gap-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 transition ${!notif.isRead ? 'bg-emerald-50/30 dark:bg-emerald-900/10' : ''}`}
+                          >
+                            <div className="mt-0.5 flex-shrink-0">
+                              {notif.type === 'success' && <Check className="h-4 w-4 text-emerald-500" />}
+                              {notif.type === 'warning' && <AlertTriangle className="h-4 w-4 text-amber-500" />}
+                              {notif.type === 'error' && <XCircle className="h-4 w-4 text-red-500" />}
+                              {notif.type === 'info' && <Info className="h-4 w-4 text-blue-500" />}
+                            </div>
+                            <div className="flex-1">
+                              <p className={`text-sm ${!notif.isRead ? 'font-semibold text-slate-800 dark:text-slate-100' : 'text-slate-600 dark:text-slate-300'}`}>
+                                {notif.message}
+                              </p>
+                              <span className="text-[10px] text-slate-400 mt-1 block">
+                                {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                            {!notif.isRead && (
+                              <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></div>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* ACCOUNT */}
             <div className="relative">

@@ -69,15 +69,31 @@ app.use("/api/payments", paymentRoutes);
 
 
 app.use("/api/doctor", doctorRoutes);
+import aiRoutes from "./routes/ai.js";
+app.use("/api/ai", aiRoutes);
+import notificationRoutes from "./routes/notifications.js";
+app.use("/api/notifications", notificationRoutes);
+
+
 
 // Global Error Handler
 app.use(errorHandler);
 
 
 
+// Store io globally for routes to access
+app.set("socketio", io);
+
 // Socket.IO signaling for chat and WebRTC
 io.on("connection", (socket) => {
   console.log("🔌 Socket connected", socket.id);
+
+  // New: Users join their personal room for notifications
+  socket.on("joinUserRoom", (userId) => {
+    if (!userId) return;
+    socket.join(userId);
+    console.log(`User ${userId} joined their personal room.`);
+  });
 
   socket.on("joinRoom", (roomId) => {
     if (!roomId) return;
