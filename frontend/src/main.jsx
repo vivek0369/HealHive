@@ -21,6 +21,7 @@ import DoctorProfile from "./pateint form/DoctorProfile.jsx";
 import ConsultationPayment from "./pateint form/ConsultationPayment.jsx";
 import CallRoom from "./chat/pages/CallRoom.jsx";
 import AppointmentHistory from "./pateint form/AppointmentHistory.jsx";
+import { PrivateRoute, DoctorRoute, PatientRoute } from "./components/ProtectedRoute.jsx";
 
 // Lazy load dashboards
 const PatientDashboard = lazy(() => import("./pateint form/patient dashboard/PatientDashboard.jsx"));
@@ -50,17 +51,23 @@ createRoot(document.getElementById("root")).render(
               <Route path="/create-account" element={<CreateAccount />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/resetsuccess" element={<ResetSuccess />} />
-              <Route path="/patient-form" element={<PatientForm />} />
-              <Route path="/available-doctors" element={<DoctorsAvailable />} />
-              <Route path="/patient-dashboard" element={<PatientDashboard />} />
-              <Route path="/doc" element={<DoctorForm />} />
-              <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
-              <Route path="/chat/:consultationId" element={<ChatPage />} />
-              <Route path="/doctor-search" element={<DoctorSearch />} />
-              <Route path="/doctor-profile/:doctorId" element={<DoctorProfile />} />
-              <Route path="/consultation-payment/:doctorId" element={<ConsultationPayment />} />
-              <Route path="/call-room/:consultationId" element={<CallRoom />} />
-              <Route path="/appointment-history" element={<AppointmentHistory />} />
+              
+              {/* Patient Routes */}
+              <Route path="/patient-form" element={<PatientRoute><PatientForm /></PatientRoute>} />
+              <Route path="/available-doctors" element={<PatientRoute><DoctorsAvailable /></PatientRoute>} />
+              <Route path="/patient-dashboard" element={<PatientRoute><PatientDashboard /></PatientRoute>} />
+              <Route path="/doctor-search" element={<PatientRoute><DoctorSearch /></PatientRoute>} />
+              <Route path="/doctor-profile/:doctorId" element={<PatientRoute><DoctorProfile /></PatientRoute>} />
+              <Route path="/consultation-payment/:doctorId" element={<PatientRoute><ConsultationPayment /></PatientRoute>} />
+              <Route path="/appointment-history" element={<PatientRoute><AppointmentHistory /></PatientRoute>} />
+              
+              {/* Doctor Routes */}
+              <Route path="/doc" element={<DoctorRoute><DoctorForm /></DoctorRoute>} />
+              <Route path="/doctor-dashboard" element={<DoctorRoute><DoctorDashboard /></DoctorRoute>} />
+              
+              {/* Shared Protected Routes */}
+              <Route path="/chat/:consultationId" element={<PrivateRoute><ChatPage /></PrivateRoute>} />
+              <Route path="/call-room/:consultationId" element={<PrivateRoute><CallRoom /></PrivateRoute>} />
             </Routes>
           </Suspense>
         </BrowserRouter>

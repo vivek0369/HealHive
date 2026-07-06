@@ -42,12 +42,12 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const { user, loading: authLoading } = useAuth();
 
-  // Redirect already-authenticated users straight to home
+  // Redirect already-authenticated users straight to home, but skip if we are actively logging them in
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && !loading) {
       navigate("/");
     }
-  }, [authLoading, user, navigate]);
+  }, [authLoading, user, navigate, loading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
