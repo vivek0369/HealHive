@@ -9,6 +9,7 @@ import userRoutes from "./routes/users.js";
 import patientRoutes from "./routes/Patient.js";
 import doctorRoutes from "./routes/Doctor.js";
 import paymentRoutes from "./routes/payments.js";
+import webhookRoutes from "./routes/webhooks.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 dotenv.config();
@@ -27,6 +28,9 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 }));
+
+// Stripe webhook requires raw body, so we mount it BEFORE express.json()
+app.use("/api/webhooks", webhookRoutes);
 
 app.use(express.json());
 
