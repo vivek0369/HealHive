@@ -9,6 +9,7 @@ import userRoutes from "./routes/users.js";
 import patientRoutes from "./routes/Patient.js";
 import doctorRoutes from "./routes/Doctor.js";
 import paymentRoutes from "./routes/payments.js";
+import prescriptionRoutes from "./routes/prescriptions.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 dotenv.config();
@@ -66,7 +67,7 @@ app.use("/api/users", userRoutes);
 
 app.use("/api/patient", patientRoutes);
 app.use("/api/payments", paymentRoutes);
-
+app.use("/api/prescriptions", prescriptionRoutes);
 
 app.use("/api/doctor", doctorRoutes);
 

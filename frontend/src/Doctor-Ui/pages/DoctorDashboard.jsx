@@ -13,6 +13,7 @@ import {
   User,
   X,
   PhoneCall,
+  FileText,
 } from "lucide-react";
 import Navbar from "../../Homepage/Navbar";
 import Footer from "../../Homepage/footer";
@@ -44,6 +45,10 @@ const DoctorDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [openEdit, setOpenEdit] = useState(false);
   const [editData, setEditData] = useState(null);
+  const [prescriptionModalOpen, setPrescriptionModalOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [prescriptionForm, setPrescriptionForm] = useState({ medications: "", notes: "" });
+  const [isGenerating, setIsGenerating] = useState(false);
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -164,6 +169,46 @@ const DoctorDashboard = () => {
     setOpenEdit(false);
   };
 
+  const handleGeneratePrescription = async () => {
+    if (!selectedPatient) return;
+    try {
+      setIsGenerating(true);
+      const payload = {
+        patientName: selectedPatient.name,
+        doctorName: doctor.fullName,
+        specialty: doctor.specialty,
+        consultationId: selectedPatient.consultationId,
+        medications: prescriptionForm.medications,
+        notes: prescriptionForm.notes,
+      };
+
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/prescriptions/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error("Failed to generate PDF");
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `prescription_${selectedPatient.name?.replace(/\s+/g, '_') || 'patient'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      setPrescriptionModalOpen(false);
+      setPrescriptionForm({ medications: "", notes: "" });
+    } catch (err) {
+      console.error(err);
+      alert("Error generating prescription.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -268,6 +313,18 @@ const DoctorDashboard = () => {
                           >
                             <PhoneCall className="h-4 w-4" />
                             Join Call
+                          </button>
+                          {/* Prescription Button */}
+                          <button
+                            onClick={() => {
+                              setSelectedPatient(a);
+                              setPrescriptionModalOpen(true);
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition text-sm font-semibold"
+                            title="Generate Prescription"
+                          >
+                            <FileText className="h-4 w-4" />
+                            Rx
                           </button>
                         </div>
                       </>
@@ -400,6 +457,76 @@ const DoctorDashboard = () => {
             </button>
           </div>
         </div>
+        )}
+
+        {/* PRESCRIPTION MODAL */}
+        {prescriptionModalOpen && selectedPatient && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-6 w-full max-w-lg relative space-y-4 shadow-xl">
+              <button
+                onClick={() => setPrescriptionModalOpen(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <h2 className="text-xl font-bold flex items-center gap-2 text-slate-800">
+                <FileText className="h-5 w-5 text-emerald-600" />
+                Generate Prescription
+              </h2>
+              <p className="text-sm text-slate-500">
+                Patient: <strong className="text-slate-800">{selectedPatient.name}</strong>
+              </p>
+
+              <div className="space-y-4 text-sm mt-4">
+                <div>
+                  <label className="block text-slate-700 font-medium mb-1">Medications</label>
+                  <textarea
+                    value={prescriptionForm.medications}
+                    onChange={(e) => setPrescriptionForm({ ...prescriptionForm, medications: e.target.value })}
+                    placeholder="e.g., Paracetamol 500mg - 1 tablet twice a day after meals"
+                    rows="4"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-700 font-medium mb-1">Clinical Notes / Advice</label>
+                  <textarea
+                    value={prescriptionForm.notes}
+                    onChange={(e) => setPrescriptionForm({ ...prescriptionForm, notes: e.target.value })}
+                    placeholder="e.g., Drink plenty of water and rest for 2 days."
+                    rows="3"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setPrescriptionModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-medium hover:bg-slate-50 transition"
+                  disabled={isGenerating}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleGeneratePrescription}
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition flex items-center justify-center gap-2"
+                  disabled={isGenerating}
+                >
+                  {isGenerating ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="h-4 w-4" /> Download PDF
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
         </div>
       </div>
